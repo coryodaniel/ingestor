@@ -59,7 +59,7 @@ module Ingestor
           record = finder ? finder.call(values) : nil
 
           if record && record.class.ancestors.count{|r| r.to_s =~ /ActiveModel/} > 0
-            record = processor ? processor.call(values, record) : default_processor(values, record)
+            record = process_record(values,record)
             after ? after.call(record) : record
           else
             Ingestor::LOG.warn("Processing skipped, ActiveModel type record not returned for #{values.join(',')}")
@@ -74,12 +74,17 @@ module Ingestor
       line_processor ? line_processor.call(line) : default_line_processor(line)
     end
 
+    def process_record(values,record)
+      attrs = attribute_map(values)
+      processor ? processor.call(attrs, record) : default_processor(attrs, record)
+    end
+
     def default_line_processor(line)
       line.split(delimiter)
     end
 
-    def default_processor(values,record)
-      record.update_attributes( attribute_map(values), :without_protection => without_protection)
+    def default_processor(attrs,record)
+      record.update_attributes( attrs, :without_protection => without_protection)
       record
     end
 

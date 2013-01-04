@@ -122,24 +122,61 @@ describe Ingestor::File do
     end    
   end
 
-  pending 'finder'
-  pending 'before'
-  pending 'processor'
-  pending 'after'
+  describe '#before' do
+    before :each do
+      ingest("./samples/flags.txt") do
+        includes_header true
+        finder{|values| Country.new}
+        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        before{|values|
+          values[0].reverse!
+          values
+        }
+      end
+    end
+    it 'should modify values in place when using a #before callback' do
+      Country.first.name.should == 'rodavlaS lE'
+    end
+  end
 
+  describe '#after' do
+    before :each do
+      @records = []
+      ingest("./samples/flags.txt") do
+        includes_header true
+        finder{|values| Country.new}
+        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        after{|record|
+          @records << record
+        }
+      end
+    end
 
-  # describe '#finder' do
-  #   before do
-  #     @file = ingest("./samples/flags.txt") do
-  #       finder{|values|
+    it 'should pass the current record to an #after callback' do
+      @records.length.should be(11)
+    end
+  end  
 
-  #       }
-  #     end
-  #   end
-  #   it 'should be able to provide an active model compliant object' do
+  describe '#processor' do
+    before do
+      ingest("./samples/flags.txt") do
+        includes_header true
+        finder{|values| Country.new}
+        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        processor{|attrs,record|
+          record.update_attributes attrs, without_protection: true
+          record.secrets = "Squirrel Party"
+          record.save
+          record
+        }
+      end    
+    end
 
-  #   end
-  # end
-
+    it 'should use the optional #processor when provided' do
+      Country.where(secrets: 'Squirrel Party').count.should be(11)
+    end
+  end
+  
   pending 'parsing csv'
+  pending 'parsing json'
 end

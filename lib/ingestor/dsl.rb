@@ -11,6 +11,7 @@ module Ingestor
 
     # skip first line?
     def includes_header(v);           @includes_header = v;end;
+    # only used with default processor
     def without_protection(v);        @without_protection = v;end;
     def delimiter(v);                 @delimiter = v;end;
     
@@ -41,6 +42,9 @@ module Ingestor
       @line_processor = block
     end
 
+    # Proc should receive two parameters
+    #   attrs - Hash, mapped attributs for this record
+    #   record - ~ActiveRecord:Base, record found by #finder
     def processor(&block)
       if !block_given? || block.arity != 2
         raise InvalidBlockSpecification, "processor proc should have an arity of 2 (Array: values, ~ActiveRecord: record)"

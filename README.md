@@ -1,7 +1,5 @@
 # Ingestor
 
-Not ready for use, currently porting code into this from a private repo...
-
 A simple DSL for importing data from text and csv files to ActiveRecord. This was originally designed to 
 continually import changing data from EAN and Geonames.
 
@@ -83,11 +81,16 @@ DSL Options
   
   1. Copy spec/orm/database.example.yml => spec/orm/database.yml
   2. Configure spec/orm/database.yml
-  3. export db=YOUR_ADAPTER_HERE; bundle exec guard
+  3. 
+    export db=YOUR_ADAPTER_HERE; bundle exec guard
+    export db=mysql; bundle exec guard
+
 
 ## TODO
 
-0. continue testing DSL @ file_spec.rb:76
+0. Rails generator for ingestors
 1. Mongoid Support
 2. JSON, CSV parsing
 3. Disable validations option
+4. lambdas as values in hash for column_map
+5. consider blocks that receive values receiving a set of mapped and unmapped values...
