@@ -77,6 +77,11 @@ describe Ingestor::File do
   end
 
 
+  pending 'finder'
+  pending 'before'
+  pending 'processor'
+  pending 'after'
+
 
   # describe '#finder' do
   #   before do
