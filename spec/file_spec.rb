@@ -1,4 +1,13 @@
 require 'spec_helper'
+
+def default_test_ingestor
+  ingest("./samples/flags.txt") do
+    includes_header true
+    finder{|values| Country.new}
+    column_map 0 => :name, 1 => :colors, 2 => :count
+  end
+end
+
 describe Ingestor::File do
   describe 'loading local files' do
     before :each do
@@ -40,16 +49,20 @@ describe Ingestor::File do
     end    
   end
 
-  describe '#includes_header option' do
+  describe '#includes_header' do
     it 'should include a header' do
       ingest("./samples/flags.txt") do
         includes_header true
-      end.header.should == "Country|Colors|Count"
+        finder{|values| Country.new}
+        column_map 0 => :name, 1 => :colors, 2 => :count        
+      end.header.should == "Country|Colors|Count|Secrets"
     end
 
     it 'should not include a header' do
       ingest("./samples/flags.txt") do
         includes_header false
+        finder{|values| Country.new}
+        column_map 0 => :name, 1 => :colors, 2 => :count
       end.header.should be_nil
     end    
   end
@@ -76,6 +89,38 @@ describe Ingestor::File do
     end
   end
 
+  describe '#delimiter' do
+    before do
+      @file = default_test_ingestor
+    end
+
+    it 'should allow the delimiter to be changed' do
+      @file.delimiter = ','
+      @file.process_line("Chicken,Cats,Dogs").should eq ['Chicken', 'Cats', 'Dogs']
+    end
+  end
+
+  describe '#without_protection' do
+    it "should not set the value when using protection" do
+      ingest("./samples/flags.txt") do
+        includes_header true
+        finder{|values| Country.new}
+        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        without_protection false
+      end
+      Country.where(name: 'Germany').first.secrets.should be(nil)
+    end
+
+    it "should set the value when not using protection" do
+      ingest("./samples/flags.txt") do
+        includes_header true
+        finder{|values| Country.new}
+        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        without_protection true
+      end      
+      Country.where(name: 'Germany').first.secrets.should == 'fat steamy wieners'
+    end    
+  end
 
   pending 'finder'
   pending 'before'
@@ -95,10 +140,6 @@ describe Ingestor::File do
 
   #   end
   # end
-
-  #describe '#without_protection option' do
-  #  User.new(secure_or_controlled_attributes, :without_protection => true)
-  #end
 
   pending 'parsing csv'
 end

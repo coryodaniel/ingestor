@@ -19,7 +19,3 @@ RSpec.configure do |config|
     Dummy.delete_all
   }
 end
-
-#TODO: Expose continue_from, use 
-#TODO: continue testing DSL @ file_spec.rb:76
-#TODO: csv

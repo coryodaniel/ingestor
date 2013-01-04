@@ -1,15 +1,12 @@
-Country|Colors|Count
-El Salvador|blue,white|2
-Finland|blue,white|2
-Ukraine|blue,yellow|2
-Kosovo|blue,yellow,white|3
-United States|red,white,blue|3
-Australia|red,white,blue|3
-Fiji|red,white,blue|3
-Norway|red,white,blue|3
-Canada|red,white|2
-Latvia|red,white|2
-Japan|red,white|2
-Yemen|red,white,black|3
-China|red,yellow|2
-Germany|red,yellow,black|3
+Country|Colors|Count|Secrets
+El Salvador|blue,white|2|great at hand stands
+Finland|blue,white|2|secret inventors of the macarena
+Ukraine|blue,yellow|2|break dancing masters
+United States|red,white,blue|3|cheese burgers
+Australia|red,white,blue|3|sunburn magic powers
+Fiji|red,white,blue|3|scrumptius water
+Norway|red,white,blue|3|dah its cold
+Canada|red,white|2|eh its cold
+Japan|red,white|2|gukkon
+China|red,yellow|2|only first world when you're looking
+Germany|red,yellow,black|3|fat steamy wieners

@@ -68,7 +68,7 @@ DSL Options
 
 
     ingest("file.txt") do
-    
+
     end
 
 ## Contributing
@@ -87,5 +87,7 @@ DSL Options
 
 ## TODO
 
+0. continue testing DSL @ file_spec.rb:76
 1. Mongoid Support
 2. JSON, CSV parsing
+3. Disable validations option

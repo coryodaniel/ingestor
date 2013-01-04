@@ -12,6 +12,7 @@ class TestMigration < ActiveRecord::Migration
       t.column :name, :string
       t.column :colors, :string
       t.column :count, :integer
+      t.column :secrets, :string
     end
 
     create_table :dummies, :force => true do |t|
@@ -27,4 +28,6 @@ class TestMigration < ActiveRecord::Migration
 end
 
 class Dummy < ActiveRecord::Base;end;
-class Country < ActiveRecord::Base;end;
+class Country < ActiveRecord::Base
+  attr_protected :secrets
+end

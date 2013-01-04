@@ -49,13 +49,12 @@ module Ingestor
       if delimiter == :csv
         # TODO, noop
       else
-
-        if includes_header
-          @header = @working_file.gets.strip
-        end
-
-        while line = @working_file.gets do        
-          values = line_processor ? line_processor.call(line) : default_line_processor(line)
+        @header = @working_file.gets.strip if includes_header
+        
+        while line = @working_file.gets do
+          line.chomp!    
+          values = process_line(line)
+          
           values = before ? before.call(values) : values
           record = finder ? finder.call(values) : nil
 
@@ -69,6 +68,10 @@ module Ingestor
       end
 
       self
+    end
+
+    def process_line(line)
+      line_processor ? line_processor.call(line) : default_line_processor(line)
     end
 
     def default_line_processor(line)

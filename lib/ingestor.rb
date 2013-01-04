@@ -11,7 +11,7 @@ require 'debugger'
 
 module Ingestor
   LOG = Logger.new(STDOUT)
-  LOG.level = Logger::DEBUG
+  LOG.level = Logger::WARN
 end
 
 def ingest(filename, &block)

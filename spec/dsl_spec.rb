@@ -108,6 +108,8 @@ describe Ingestor::Dsl do
   end
 
   it 'should be able to construct an Ingestor::File' do
+    @dsl.finder{|values| Country.new}
+    @dsl.column_map 0 => :name, 1 => :colors, 2 => :count
     @dsl.build.should be_kind_of(Ingestor::File)
   end
 end
