@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'ingestor'
+
+# TODO: take working directory
+# TODO: take path to an ingestion
+
+Ingestor::Config.ensure_path!
+
+ingest "../samples/flags.txt" do
+end
+
+ingest "https://www.ian.com/affiliatecenter/include/V2/ChainList.zip" do
+end
+
+ingest "../samples/animals.csv" do
+end

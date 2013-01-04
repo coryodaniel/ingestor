@@ -1,0 +1,7 @@
+common name, domesticated, family, subfamily, genus
+chicken, true, Phasianidae, Phasianidae, Gallus
+brown bear, false, Ursidae,,Ursus
+cow, true, Bovidae, Bovinae, Bos
+dog, true, Canidae,,Canis
+cat,true, Felidae,,Felis
+platypus,false,Ornithorhynchidae,,Ornithorhynchus

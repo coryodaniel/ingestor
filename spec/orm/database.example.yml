@@ -1,0 +1,15 @@
+sqlite3: 
+  adapter: sqlite3 
+  database: ":memory:"
+postgresql: 
+  adapter: postgresql
+  database: ingestor_test
+  username: ingestor
+  password: ingestor
+  min_messages: WARNING
+mysql: 
+  adapter: mysql 
+  host: localhost 
+  database: ingestor_test
+  username: ingestor
+  password: ingestor
