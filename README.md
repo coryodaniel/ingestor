@@ -17,6 +17,9 @@ Or install it yourself as:
 
     $ gem install ingestor
 
+Add the following to your Rakefile
+    require 'ingestor/tasks'
+    
 ## Usage
 
   Given a text file
@@ -89,8 +92,9 @@ DSL Options
 ## TODO
 
 0. Rails generator for ingestors
-1. Mongoid Support
-2. JSON, CSV parsing
-3. Disable validations option
-4. lambdas as values in hash for column_map
+1. bin
+2. Mongoid Support
+3. JSON, CSV parsing
+4. Disable validations option
+5. lambdas as values in hash for column_map
 5. consider blocks that receive values receiving a set of mapped and unmapped values...
