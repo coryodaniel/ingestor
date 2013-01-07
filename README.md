@@ -90,8 +90,9 @@ DSL Options
 
 
 ## TODO
-
+* bin/ingestor sample PATH --no-header --delimiter="|" -> Display what a sample row from file
 * Mongoid Support
+* specify encoding(?)
 * JSON, CSV parsing
 * Disable validations option
 * lambdas as values in hash for column_map

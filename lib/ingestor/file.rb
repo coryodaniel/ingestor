@@ -93,6 +93,8 @@ module Ingestor
     def load_remote
       Ingestor::LOG.debug("Remote file detected #{file}...")
       @working_file = Tempfile.new("local", Config.working_directory)
+      @working_file.binmode if compressed?
+
       open( file, 'rb' ) do |remote_file|
         Ingestor::LOG.debug("Downloading #{file}...")
         @working_file.write remote_file.read
@@ -106,7 +108,7 @@ module Ingestor
       Ingestor::LOG.debug("Compressed file detected #{file}...")
       @tempfile     = @working_file
       @working_file = Tempfile.new("decompressed", Config.working_directory)
-
+      
       Zip::ZipFile.open(@tempfile.path) do |zipfile|
         zipfile.each do |entry|
           istream = entry.get_input_stream
