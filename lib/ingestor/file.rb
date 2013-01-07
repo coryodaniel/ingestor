@@ -48,6 +48,8 @@ module Ingestor
     
       if delimiter == :csv
         # TODO, noop
+      elsif delimiter == :json
+        # TODO, noop
       else
         @header = @working_file.gets.strip if includes_header
         

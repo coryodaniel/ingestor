@@ -91,10 +91,8 @@ DSL Options
 
 ## TODO
 
-0. Rails generator for ingestors
-1. bin
-2. Mongoid Support
-3. JSON, CSV parsing
-4. Disable validations option
-5. lambdas as values in hash for column_map
-5. consider blocks that receive values receiving a set of mapped and unmapped values...
+* Mongoid Support
+* JSON, CSV parsing
+* Disable validations option
+* lambdas as values in hash for column_map
+* consider blocks that receive values receiving a set of mapped and unmapped values...

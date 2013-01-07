@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["github@coryodaniel.com"]
   gem.description   = "Ingesting local and remote data files into ActiveRecord"
   gem.summary       = "Ingesting local and remote data files into ActiveRecord"
-  gem.homepage      = ""
+  gem.homepage      = "http://github.com/coryodaniel/ingestor"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
@@ -18,4 +18,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.add_dependency "docile"
   gem.add_dependency "rubyzip"
+  gem.add_dependency "thor"
+  gem.add_dependency "activesupport", '>= 3.2.0'
 end

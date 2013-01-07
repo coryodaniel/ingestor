@@ -1,17 +1,52 @@
 #!/usr/bin/env ruby
 
 require 'ingestor'
+require 'thor'
+require 'active_support/inflector'
 
-# TODO: take working directory
-# TODO: take path to an ingestion
+Ingestor::Config.ensure_working_directory!
+module Ingestor
+  class CommandLine < Thor
 
-Ingestor::Config.ensure_path!
+    desc "generate PATH", "Create a new ingestor for PATH. PATH should be an absolute path or URL"
+    def generate(path)
+      Ingestor::Config.ensure_output_directory!
+      
+      file_name   = ::File.basename(path).underscore.parameterize.underscore
+      file_name   = %Q{#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{file_name}.rb}
+      
+      generated_file = ::File.join( Ingestor::Config.output_directory, file_name )
 
-ingest "../samples/flags.txt" do
+      ::File.open(generated_file, 'w+') do |f|
+        f.puts <<-HEREDOC
+#! /usr/bin/env ruby
+require 'ingestor'
+
+ingest "#{path}" do
+  delimiter "|" #:csv, :json
+  
+  # How to map out the columns from text to AR
+  column_map({
+    # 0 => :name,
+    # 1 => :description,
+    # 2 => [:created_at, :updated_at]
+  })
+  finder{|values|
+    # Your strategy for finding or instantiating a new object to be handled by the processor block
+    MyClass.find( values[0] ) || MyClass.new
+  }
+  #processor{|values,record|  
+  # ... custom processor here ...
+  #}
+  #before{|values| values}
+  #after{|record| record}
+end
+HEREDOC
+      end
+
+      say "Generated #{generated_file}"
+    end
+  end
 end
 
-ingest "https://www.ian.com/affiliatecenter/include/V2/ChainList.zip" do
-end
-
-ingest "../samples/animals.csv" do
-end
+Ingestor::CommandLine.start

@@ -10,7 +10,7 @@ gem "guard-rspec"
 gem 'debugger', '1.2.0'
 gem 'vcr'
 gem 'fakeweb'
-gem 'activerecord'
+gem 'activerecord', "~>3.2.0"
 gem 'mysql2'
 gem 'rb-fsevent'
 gem 'ruby_gntp'

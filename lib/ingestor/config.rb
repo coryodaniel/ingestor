@@ -1,6 +1,9 @@
 module Ingestor
   class Config
     class << self
+      def output_directory
+        'script/ingestors'
+      end
       def working_directory
         @working_directory || "/tmp/ingestor"
       end
@@ -10,7 +13,13 @@ module Ingestor
         @working_directory ||= path
       end
 
-      def ensure_path!
+      def ensure_output_directory!
+        unless Dir.exists?(output_directory)
+          FileUtils.mkdir_p(output_directory, mode: 0755)
+        end
+      end
+
+      def ensure_working_directory!
         unless Dir.exists?(working_directory)
           Dir.mkdir(working_directory, 0777)
         end
