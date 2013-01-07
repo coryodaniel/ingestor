@@ -108,6 +108,7 @@ module Ingestor
       Ingestor::LOG.debug("Compressed file detected #{file}...")
       @tempfile     = @working_file
       @working_file = Tempfile.new("decompressed", Config.working_directory)
+      @working_file.binmode
       
       Zip::ZipFile.open(@tempfile.path) do |zipfile|
         zipfile.each do |entry|
