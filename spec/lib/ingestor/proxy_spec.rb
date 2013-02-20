@@ -8,21 +8,21 @@ def default_test_ingestor
   end
 end
 
-describe Ingestor::File do
+describe Ingestor::Proxy do
   describe 'loading local files' do
     before :each do
-      @file = ingest("./samples/flags.txt") do
+      @proxy = ingest("./samples/flags.txt") do
         finder{|values| Country.new}
         column_map 0 => :name, 1 => :colors, 2 => :count
       end
     end
     it 'should know if a file is local' do
-      @file.should be_local
-      @file.should_not be_remote
+      @proxy.should be_local
+      @proxy.should_not be_remote
     end
 
     it 'should know if a file is compressed' do
-      @file.should_not be_compressed
+      @proxy.should_not be_compressed
     end    
   end
 
@@ -30,23 +30,35 @@ describe Ingestor::File do
     use_vcr_cassette 'remote-zipped-files'
 
     before :each do
-      @file  = ingest("https://www.ian.com/affiliatecenter/include/V2/ChainList.zip") do
+      @proxy  = ingest("https://www.ian.com/affiliatecenter/include/V2/ChainList.zip") do
         finder{|values| Dummy.new}
         column_map 0 => :id, 1 => :name
+        compressed true
       end
     end
     it 'should know if a file is remote' do
-      @file.should_not be_local
-      @file.should be_remote
+      @proxy.should_not be_local
+      @proxy.should be_remote
     end
 
     it 'should know if a file is compressed' do
-      @file.should be_compressed
+      @proxy.should be_compressed
     end    
 
     it 'should create a tempfile for remote files' do
-      File.exists?( @file.working_file.path ).should be true
+      File.exists?( @proxy.document.path ).should be true
     end    
+  end
+
+  describe '#parser' do
+
+    it 'should be able to set the parser type' do
+      true.should be(false)
+    end
+    it 'should have plain text as the default parser' do
+      true.should be(false)
+    end
+
   end
 
   describe '#includes_header' do
@@ -69,7 +81,7 @@ describe Ingestor::File do
 
   describe '#column_map' do
     before do
-      @file = ingest("./samples/flags.txt") do
+      @proxy = ingest("./samples/flags.txt") do
         includes_header true
         column_map({
           0 => :name,
@@ -81,7 +93,7 @@ describe Ingestor::File do
 
     it 'should be able to output an attributes hash' do
       sample_values = ['Finland', 'blue,white', '2']
-      @file.attribute_map(sample_values).should == {
+      @proxy.attribute_map(sample_values).should == {
         :name   => 'Finland',
         :colors => 'blue,white',
         :count  => '2'
@@ -91,12 +103,12 @@ describe Ingestor::File do
 
   describe '#delimiter' do
     before do
-      @file = default_test_ingestor
+      @proxy = default_test_ingestor
     end
 
     it 'should allow the delimiter to be changed' do
-      @file.delimiter = ','
-      @file.process_line("Chicken,Cats,Dogs").should eq ['Chicken', 'Cats', 'Dogs']
+      @proxy.delimiter = ','
+      @proxy.process_line("Chicken,Cats,Dogs").should eq ['Chicken', 'Cats', 'Dogs']
     end
   end
 
@@ -176,7 +188,4 @@ describe Ingestor::File do
       Country.where(secrets: 'Squirrel Party').count.should be(11)
     end
   end
-  
-  pending 'parsing csv'
-  pending 'parsing json'
 end

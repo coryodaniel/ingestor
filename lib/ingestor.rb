@@ -5,8 +5,9 @@ require 'logger'
 require 'zip/zipfilesystem'
 require "ingestor/version"
 require 'ingestor/config'
-require 'ingestor/file'
+require 'ingestor/proxy'
 require 'ingestor/dsl'
+require 'ingestor/parser/plain_text'
 require 'debugger'
 
 module Ingestor
@@ -15,9 +16,7 @@ module Ingestor
 end
 
 def ingest(filename, &block)
-  parser = Ingestor::Dsl.new
-  parser.file = filename
-  file = Docile.dsl_eval(parser, &block).build
-
-  file.start!
+  options = Ingestor::Dsl.new
+  options.file = filename
+  proxy = Docile.dsl_eval(options, &block).build.start!
 end

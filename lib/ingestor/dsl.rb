@@ -2,19 +2,33 @@ module Ingestor
   class Dsl
     class InvalidBlockSpecification < Exception;end;
     def initialize(*args)
+      @options = {}
       includes_header(false)
       without_protection(true)
       delimiter '|'
+      compressed(false)
+      parser :plain_text
+      parser_options({})
     end
 
+    # set parser, default :plain_text
+    def parser(v); @parser = v;end;
+    # set options
+    def parser_options(v); @parser_options = v;end;
+
+    # the file to retrieve
     def file=(v);                     @file = v;end;
 
     # skip first line?
     def includes_header(v);           @includes_header = v;end;
+    
     # only used with default processor
     def without_protection(v);        @without_protection = v;end;
     def delimiter(v);                 @delimiter = v;end;
     
+    # if the remote file is compressed, this will decompress it.
+    def compressed(v);                @compressed = v;end;
+
     # Takes an array of values (a line) and should return an
     # ActiveModel type object
     #
@@ -32,14 +46,14 @@ module Ingestor
       @finder = block
     end
 
-    # receives line, returns array
+    # receives entry in file (line, node, etc), returns array
     # Optional, only used if using a text delimiter
     # ie, wont be used for :json,or :csv
-    def line_processor(&block)
+    def entry_processor(&block)
       if !block_given? || block.arity != 1
-        raise InvalidBlockSpecification, "line_processor proc should have an arity of 1 (String: line)"
+        raise InvalidBlockSpecification, "entry_processor proc should have an arity of 1 (String: line)"
       end
-      @line_processor = block
+      @entry_processor = block
     end
 
     # Proc should receive two parameters
@@ -76,7 +90,7 @@ module Ingestor
     end
 
     def build
-      Ingestor::File.new(@file, @includes_header, @without_protection, @delimiter, @finder, @line_processor, @processor, @before, @after, @column_map)
+      Ingestor::Proxy.new(@file, @includes_header, @without_protection, @delimiter, @finder, @entry_processor, @processor, @before, @after, @column_map, @compressed)
     end    
   end
 end

@@ -8,6 +8,8 @@ describe Ingestor::Dsl do
     @dsl.instance_variable_get("@file").should == "file.txt"
   end
 
+
+
   it 'should not expect a header by default' do
     @dsl.instance_variable_get("@includes_header").should be(false)
   end
@@ -21,6 +23,13 @@ describe Ingestor::Dsl do
     @dsl.instance_variable_get("@includes_header").should be(true)
     @dsl.includes_header(false)
     @dsl.instance_variable_get("@includes_header").should be(false)
+  end
+
+  it 'should be able to mark a file as compressed' do
+    @dsl.compressed(true)
+    @dsl.instance_variable_get("@compressed").should be(true)
+    @dsl.compressed(false)
+    @dsl.instance_variable_get("@compressed").should be(false)
   end
 
   it 'should be able to disable AREL attribute protection' do
@@ -44,14 +53,20 @@ describe Ingestor::Dsl do
     @dsl.instance_variable_get("@delimiter").should == :csv
   end
 
+  it 'should be able to specify the parser' do
+    @dsl.parser( :plain_text )
+    @dsl.instance_variable_get("@parser").should == :plain_text
+  end
+
+
   it 'should be able to pass a block that finds or initializes the AR object' do
     @dsl.finder {|values| }
     @dsl.instance_variable_get("@finder").should be_kind_of(Proc)
   end
 
   it 'should be able to override the line processor' do
-    @dsl.line_processor {|line|}
-    @dsl.instance_variable_get("@line_processor").should be_kind_of(Proc)
+    @dsl.entry_processor {|line|}
+    @dsl.instance_variable_get("@entry_processor").should be_kind_of(Proc)
   end
   it 'should be able to override the record processor' do
     @dsl.processor {|values,record| }
@@ -72,9 +87,9 @@ describe Ingestor::Dsl do
     }.should raise_exception(Ingestor::Dsl::InvalidBlockSpecification)
   end
 
-  it 'should raise an exception if the arity is incorrect for line_processor' do
+  it 'should raise an exception if the arity is incorrect for entry_processor' do
     lambda{
-      @dsl.line_processor{}
+      @dsl.entry_processor{}
     }.should raise_exception(Ingestor::Dsl::InvalidBlockSpecification)
   end
 
@@ -107,9 +122,9 @@ describe Ingestor::Dsl do
     @dsl.instance_variable_get("@column_map").should be_kind_of(Hash)
   end
 
-  it 'should be able to construct an Ingestor::File' do
+  it 'should be able to construct an Ingestor::Proxy' do
     @dsl.finder{|values| Country.new}
     @dsl.column_map 0 => :name, 1 => :colors, 2 => :count
-    @dsl.build.should be_kind_of(Ingestor::File)
+    @dsl.build.should be_kind_of(Ingestor::Proxy)
   end
 end

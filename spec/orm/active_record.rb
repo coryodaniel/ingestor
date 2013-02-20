@@ -2,7 +2,7 @@
 require 'active_record'
 
 ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new('log/test.log')
-ActiveRecord::Base.establish_connection YAML.load(File.open(File.join(File.dirname(__FILE__), 'database.yml')).read)[ENV['db'] || 'sqlite3']
+ActiveRecord::Base.establish_connection YAML.load(File.open(File.join(File.dirname(__FILE__), 'database.yml')).read)[ENV['db'] || 'mysql']
 
 ActiveRecord::Migration.verbose = false
 

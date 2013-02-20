@@ -1,6 +1,17 @@
 module Ingestor
   class Config
     class << self
+      def parsers
+        @parsers ||= {}
+      end
+      def register_parser(kind, klass)
+        parsers[kind] = klass
+      end
+
+      def parser_for(kind)
+        parsers[kind] || parsers[:plain_text]
+      end
+
       def output_directory
         'script/ingestors'
       end

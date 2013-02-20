@@ -23,12 +23,12 @@ Add the following to your Rakefile
 ## Usage
 
   Given a text file
-    # id|name|skill_level
-    # 1|George Washington|high
-    # 2|Colonel Sanders|low
-    # 3|Colonel Mustard|low
-    # 4|Biz Markie|high
-    # 5|Fat Blond Guy from TV|medium
+    id|name|skill_level
+    1|George Washington|high
+    2|Colonel Sanders|low
+    3|Colonel Mustard|low
+    4|Biz Markie|high
+    5|Fat Blond Guy from TV|medium
 
   And an AR Class
     class ChickenCooker
@@ -48,6 +48,7 @@ Add the following to your Rakefile
   It can handle remote files and zip files as well.
 
     ingest("http://example.com/alot_of_chicken_people.zip") do
+      compressed true
       column_map 0 => :id,
         1 => :name,
         2 => :skill_level
@@ -61,16 +62,13 @@ DSL Options
   1. includes_header - Boolean (default: false)
   2. without_proctection - Boolean (default: true)
   3. delimiter - String|Symbol (default: '|', supports any character and :csv, :json)
-  4. line_processor - Proc
+  4. entry_processor - Proc
   5. finder
   6. before
   7. processor
   8. after
-
-
-    ingest("file.txt") do
-
-    end
+  9. parser (:plain_text, :xml, :json, :csv)
+  10. parser_options
 
 ## Contributing
 
@@ -93,7 +91,7 @@ DSL Options
 * bin/ingestor sample PATH --no-header --delimiter="|" -> Display what a sample row from file
 * Mongoid Support
 * specify encoding(?)
-* JSON, CSV parsing
+* sort/limit options
 * Disable validations option
 * lambdas as values in hash for column_map
 * consider blocks that receive values receiving a set of mapped and unmapped values...
