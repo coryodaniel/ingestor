@@ -141,7 +141,7 @@ DSL Options
     * Proc(attributes,record)
     * Returns: ~ActiveModel
     * Optional
-    * Default: Proc, calls #update_attributes on record
+    * Default: Proc, calls #update_attributes on record without protection
   * after - callback that receives each record after [processor]
     * Proc(record)
     * Optional  

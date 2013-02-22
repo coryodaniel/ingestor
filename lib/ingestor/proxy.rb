@@ -69,7 +69,7 @@ module Ingestor
     end
 
     def default_processor(attrs,record)
-      record.update_attributes( attrs )
+      record.update_attributes( attrs, without_protection: true )
     end
 
     def load_remote
