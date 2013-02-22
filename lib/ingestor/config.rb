@@ -9,7 +9,9 @@ module Ingestor
       end
 
       def parser_for(kind)
-        parsers[kind] || parsers[:plain_text]
+        raise Exception, "No parser for type #{kind}" if parsers[kind].nil?
+        parsers[kind]
+
       end
 
       def output_directory

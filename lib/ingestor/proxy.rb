@@ -1,11 +1,9 @@
-# Note: http://stackoverflow.com/questions/5052512/fastest-way-to-skip-lines-while-parsing-files-in-ruby
-#
 module Ingestor
-  Proxy = Struct.new(:file, :includes_header, :without_protection, :delimiter, :finder, :entry_processor, :processor, :before, :after, :column_map, :compressed) do
+  Proxy = Struct.new(:file, :options) do
     def document
       @document
     end
-
+    
     def header
       @header
     end
@@ -18,18 +16,7 @@ module Ingestor
       !remote?
     end
 
-    def compressed?; compressed; end;
-
-    def attribute_map(values)
-      row_attributes = {}
-      column_map.each do |k,v|
-        [v].flatten.each do |attrib|
-          row_attributes[attrib] = values[k]
-        end
-      end
-
-      row_attributes
-    end
+    def compressed?; options[:compressed]; end;
 
     # for debugging, testing
     def continue_from(line_num)
@@ -37,46 +24,49 @@ module Ingestor
       @document.drop( line_num -1 ).take(1)
     end
 
+    def finder
+      options[:finder]
+    end
+
     def start!
       load
       Ingestor::LOG.warn("No #finder specified") if !finder
-      @header = @document.gets.strip if includes_header
+      @header = @document.gets.strip if options[:includes_header]
 
-      #@file_parser = Ingestor::Config.parser_for( parser ).new(self, @document)
-      
-      while line = @document.gets do
-        line.chomp!    
-        values = process_line(line)
-        
-        values = before ? before.call(values) : values
-        record = finder ? finder.call(values) : nil
+      parser = Ingestor::Config.parser_for( options[:parser] ).new(self, @document)
+      parser.options( options[:parser_options] )
 
-        if record && record.class.ancestors.count{|r| r.to_s =~ /ActiveModel/} > 0
-          record = process_record(values,record)
-          after ? after.call(record) : record
-        else
-          Ingestor::LOG.warn("Processing skipped, ActiveModel type record not returned for #{values.join(',')}")
-        end
+      unless options[:sample]
+        parser.process!
+      else
+        parser.sample!
       end
-      
+            
       self
     end
 
-    def process_line(line)
-      entry_processor ? entry_processor.call(line) : default_entry_processor(line)
+    # To be called from Parsers, send a attributes, get a record
+    def process_entry( attrs )
+      options[:before].call(attrs) if options[:before]
+            
+      record = finder ? finder.call(attrs) : nil
+
+      if record && record.class.ancestors.count{|r| r.to_s =~ /ActiveModel/} > 0            
+        record = process_record(attrs,record)
+        options[:after].call(record) if options[:after]
+        record
+      else
+        Ingestor::LOG.warn("Processing skipped, ActiveModel type record not returned for #{attrs}")
+      end
     end
 
-    def process_record(values,record)
-      attrs = attribute_map(values)
-      processor ? processor.call(attrs, record) : default_processor(attrs, record)
-    end
-
-    def default_entry_processor(line)
-      line.split(delimiter)
+    def process_record(attrs,record)
+      options[:processor] ? options[:processor].call(attrs, record) : default_processor(attrs, record)
+      record
     end
 
     def default_processor(attrs,record)
-      record.update_attributes( attrs, :without_protection => without_protection)
+      record.update_attributes( attrs, :without_protection => options[:without_protection])
       record
     end
 
@@ -113,7 +103,7 @@ module Ingestor
       load_remote if remote?
       load_compressed if compressed?
 
-      @document ||= ::File.new( file )
+      @document ||= File.new( file )
     end
   end
 end

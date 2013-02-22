@@ -36,12 +36,16 @@ Add the following to your Rakefile
     end
 
     ingest("path/to/my/chicken_skills.txt") do
-      column_map 0 => :id,
-        1 => :name,
-        2 => :skill_level
+      map_attributes do |values|
+        {
+          id:           values[0],
+          name:         values[1],
+          skill_level:  values[2]
+        }
+      end
 
       # current lines values
-      finder{|values| ChickenCooker.where(id: values[0]).first || ChickenCooker.new}
+      finder{|attrs| ChickenCooker.where(id: attrs[:id]).first || ChickenCooker.new}
 
     end
 
@@ -49,26 +53,52 @@ Add the following to your Rakefile
 
     ingest("http://example.com/alot_of_chicken_people.zip") do
       compressed true
-      column_map 0 => :id,
-        1 => :name,
-        2 => :skill_level
+      map_attributes do |values|
+        {
+          id:           values[0],
+          name:         values[1],
+          skill_level:  values[2]
+        }
+      end
 
       # current lines values
-      finder{|values| ChickenCooker.where(id: values[0]).first || ChickenCooker.new}
+      finder{|attrs| ChickenCooker.where(id: attrs[:id]).first || ChickenCooker.new}
     end
+
 
 ## Advanced Usage
 DSL Options
-  1. includes_header - Boolean (default: false)
-  2. without_proctection - Boolean (default: true)
-  3. delimiter - String|Symbol (default: '|', supports any character and :csv, :json)
-  4. entry_processor - Proc
-  5. finder
-  6. before
-  7. processor
-  8. after
-  9. parser (:plain_text, :xml, :json, :csv)
-  10. parser_options
+  * sample - Boolean (defaults: false) will dump a single raw entry from the file to STDOUT and exit
+  * includes_header - Boolean (default: false)
+  * compressed - Boolean (default: false) Is the file compressed
+  * without_proctection - Boolean (default: true)
+  * finder - Proc, required: should return an ActiveModel object (ex: MyClass.new) to store the values in
+  * before - receives attributes before call to #processor. Should return attributes hash
+  * processor
+  * after
+  * parser Symbol [:plain_text, :xml, :json, :csv]
+  * parser_options Hash (see specific parser)
+
+
+## Parsers
+There are 2 processors currently included. Plain Text and XML.
+
+Support for JSON and CSV are under development.
+
+## Plain Text Parser
+  Parses a plain text document. The default delimiter is "|"
+
+  Options
+    * delimiter - String, optional
+    * line_processor - Proc(string) -> Array, takes the raw line from the document and returns an array of values
+
+## XML Parser
+  Parses an XML document
+
+  Options
+    * selector (xpath selector to get the node collection)
+    * encoding (See nokogiri encoding, default libmxl2 best guess)
+
 
 ## Contributing
 
@@ -88,10 +118,10 @@ DSL Options
 
 
 ## TODO
-* bin/ingestor sample PATH --no-header --delimiter="|" -> Display what a sample row from file
+* re-write this readme
+* rdoc lib/ folder
+* bin/ingestor sample PATH -> take a peak at an entry from the file
 * Mongoid Support
 * specify encoding(?)
 * sort/limit options
 * Disable validations option
-* lambdas as values in hash for column_map
-* consider blocks that receive values receiving a set of mapped and unmapped values...

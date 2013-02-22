@@ -12,34 +12,57 @@ module Ingestor
     def generate(path)
       Ingestor::Config.ensure_output_directory!
       
-      file_name   = ::File.basename(path).underscore.parameterize.underscore
+      file_name   = File.basename(path).underscore.parameterize.underscore
       file_name   = %Q{#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{file_name}.rb}
       
-      generated_file = ::File.join( Ingestor::Config.output_directory, file_name )
+      generated_file = File.join( Ingestor::Config.output_directory, file_name )
 
-      ::File.open(generated_file, 'w+') do |f|
+      File.open(generated_file, 'w+') do |f|
         f.puts <<-HEREDOC
 #! /usr/bin/env ruby
 require 'ingestor'
 
+######################################
+#
+# Order of block execution is:
+#   * map_attributes
+#   * before
+#   * finder
+#   * processor
+#   * after
+#
+######################################
+
 ingest "#{path}" do
-  delimiter "|" #:csv, :json
+  parser :plain_text
+  # compressed true
+  # includes_header false
+  # parser_options delimiter: '|'
   
-  # How to map out the columns from text to AR
-  column_map({
-    # 0 => :name,
-    # 1 => :description,
-    # 2 => [:created_at, :updated_at]
-  })
-  finder{|values|
-    # Your strategy for finding or instantiating a new object to be handled by the processor block
-    MyClass.find( values[0] ) || MyClass.new
-  }
-  #processor{|values,record|  
-  # ... custom processor here ...
-  #}
-  #before{|values| values}
-  #after{|record| record}
+  # How to map out the columns from document to ActiveRecord
+  map_attributes do |values|
+    {
+      # ... create your attributes hash here for ActiveRecord/ActiveModel/etc.
+      # values may be a Hash (xml, json) or an Array (csv, plain_text)
+    }
+  end
+
+  # before{ |attrs| attrs}
+
+  # Your strategy for finding or instantiating a new object to be handled by the processor block
+  finder do |attrs|
+    MyClass.find( attrs[:id] ) || MyClass.new
+  end
+  
+  # Enable/disable attribute protection in default processor
+  # without_protection false  
+  
+  # The default processor simple calls update_attributes
+  # processor do |attrs,record|  
+  #  ... custom processor here ...
+  # end
+  
+  # after { |record| record}
 end
 HEREDOC
       end

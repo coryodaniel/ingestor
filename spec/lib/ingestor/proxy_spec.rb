@@ -4,7 +4,7 @@ def default_test_ingestor
   ingest("./samples/flags.txt") do
     includes_header true
     finder{|values| Country.new}
-    column_map 0 => :name, 1 => :colors, 2 => :count
+    map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2]} }
   end
 end
 
@@ -13,7 +13,7 @@ describe Ingestor::Proxy do
     before :each do
       @proxy = ingest("./samples/flags.txt") do
         finder{|values| Country.new}
-        column_map 0 => :name, 1 => :colors, 2 => :count
+        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2]} }
       end
     end
     it 'should know if a file is local' do
@@ -32,7 +32,9 @@ describe Ingestor::Proxy do
     before :each do
       @proxy  = ingest("https://www.ian.com/affiliatecenter/include/V2/ChainList.zip") do
         finder{|values| Dummy.new}
-        column_map 0 => :id, 1 => :name
+        map_attributes do |values|
+          {:id => values[0], :name => values[1]}
+        end
         compressed true
       end
     end
@@ -50,23 +52,14 @@ describe Ingestor::Proxy do
     end    
   end
 
-  describe '#parser' do
-
-    it 'should be able to set the parser type' do
-      true.should be(false)
-    end
-    it 'should have plain text as the default parser' do
-      true.should be(false)
-    end
-
-  end
+  pending '#sample'
 
   describe '#includes_header' do
     it 'should include a header' do
       ingest("./samples/flags.txt") do
         includes_header true
         finder{|values| Country.new}
-        column_map 0 => :name, 1 => :colors, 2 => :count        
+        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2]} }        
       end.header.should == "Country|Colors|Count|Secrets"
     end
 
@@ -74,42 +67,9 @@ describe Ingestor::Proxy do
       ingest("./samples/flags.txt") do
         includes_header false
         finder{|values| Country.new}
-        column_map 0 => :name, 1 => :colors, 2 => :count
+        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2]} }
       end.header.should be_nil
     end    
-  end
-
-  describe '#column_map' do
-    before do
-      @proxy = ingest("./samples/flags.txt") do
-        includes_header true
-        column_map({
-          0 => :name,
-          1 => :colors,
-          2 => :count
-        })
-      end
-    end
-
-    it 'should be able to output an attributes hash' do
-      sample_values = ['Finland', 'blue,white', '2']
-      @proxy.attribute_map(sample_values).should == {
-        :name   => 'Finland',
-        :colors => 'blue,white',
-        :count  => '2'
-      }
-    end
-  end
-
-  describe '#delimiter' do
-    before do
-      @proxy = default_test_ingestor
-    end
-
-    it 'should allow the delimiter to be changed' do
-      @proxy.delimiter = ','
-      @proxy.process_line("Chicken,Cats,Dogs").should eq ['Chicken', 'Cats', 'Dogs']
-    end
   end
 
   describe '#without_protection' do
@@ -117,7 +77,7 @@ describe Ingestor::Proxy do
       ingest("./samples/flags.txt") do
         includes_header true
         finder{|values| Country.new}
-        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2], :secrets => values[3]} }
         without_protection false
       end
       Country.where(name: 'Germany').first.secrets.should be(nil)
@@ -127,7 +87,7 @@ describe Ingestor::Proxy do
       ingest("./samples/flags.txt") do
         includes_header true
         finder{|values| Country.new}
-        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2], :secrets => values[3]} }
         without_protection true
       end      
       Country.where(name: 'Germany').first.secrets.should == 'fat steamy wieners'
@@ -139,10 +99,10 @@ describe Ingestor::Proxy do
       ingest("./samples/flags.txt") do
         includes_header true
         finder{|values| Country.new}
-        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
-        before{|values|
-          values[0].reverse!
-          values
+        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2], :secrets => values[3]} }
+        before{|attrs|
+          attrs[:name].reverse!
+          attrs
         }
       end
     end
@@ -157,7 +117,7 @@ describe Ingestor::Proxy do
       ingest("./samples/flags.txt") do
         includes_header true
         finder{|values| Country.new}
-        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2], :secrets => values[3]} }
         after{|record|
           @records << record
         }
@@ -174,7 +134,7 @@ describe Ingestor::Proxy do
       ingest("./samples/flags.txt") do
         includes_header true
         finder{|values| Country.new}
-        column_map 0 => :name, 1 => :colors, 2 => :count, 3 => :secrets
+        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2], :secrets => values[3]} }
         processor{|attrs,record|
           record.update_attributes attrs, without_protection: true
           record.secrets = "Squirrel Party"

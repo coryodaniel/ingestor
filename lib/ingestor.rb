@@ -7,8 +7,11 @@ require "ingestor/version"
 require 'ingestor/config'
 require 'ingestor/proxy'
 require 'ingestor/dsl'
+
+require 'ingestor/parser/base'
 require 'ingestor/parser/plain_text'
-require 'debugger'
+
+#require 'debugger'
 
 module Ingestor
   LOG = Logger.new(STDOUT)

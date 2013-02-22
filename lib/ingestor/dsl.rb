@@ -3,59 +3,67 @@ module Ingestor
     class InvalidBlockSpecification < Exception;end;
     def initialize(*args)
       @options = {}
+      
       includes_header(false)
       without_protection(true)
-      delimiter '|'
       compressed(false)
       parser :plain_text
       parser_options({})
     end
 
-    # set parser, default :plain_text
-    def parser(v); @parser = v;end;
-    # set options
-    def parser_options(v); @parser_options = v;end;
+    def options
+      @options
+    end
 
     # the file to retrieve
-    def file=(v);                     @file = v;end;
+    def file=(v);                     @file = v;end;    
+
+    # When set to true sample will get the file and print out the first
+    # set of raw values
+    def sample(v)
+      @options[:sample] = v
+    end
+
+    # set parser, default :plain_text
+    def parser(v)
+      @options[:parser] = v
+    end
+
+    # set options
+    def parser_options(v)
+      @options[:parser_options] = v
+    end
 
     # skip first line?
-    def includes_header(v);           @includes_header = v;end;
+    def includes_header(v);           @options[:includes_header] = v;end;
     
-    # only used with default processor
-    def without_protection(v);        @without_protection = v;end;
-    def delimiter(v);                 @delimiter = v;end;
+    # if you specify your own processor, you'll need to set without_protection in your code.
+    # this option ONLY works with the default processor
+    def without_protection(v);        @options[:without_protection] = v;end;
     
     # if the remote file is compressed, this will decompress it.
-    def compressed(v);                @compressed = v;end;
+    def compressed(v);                @options[:compressed] = v;end;
 
-    # Takes an array of values (a line) and should return an
+    # Takes an array of values (a line/entry/node) and should return an
     # ActiveModel type object
     #
     # You do not need to set the attributes here, than is handled by #processor
     # 
     # update or create:
-    # finder{|values| User.where(id: values[0]).first || User.new}
+    # finder{|attrs| User.where(id: attrs[:id]).first || User.new}
     #
     # create:
-    # finder{|values| User.new}
+    # finder{|attrs| User.new}
+    # @required
     def finder(&block)
       if !block_given? || block.arity != 1
         raise InvalidBlockSpecification, "finder proc should have an arity of 1 (Array: values)"
       end      
-      @finder = block
+      @options[:finder] = block
     end
 
-    # receives entry in file (line, node, etc), returns array
-    # Optional, only used if using a text delimiter
-    # ie, wont be used for :json,or :csv
-    def entry_processor(&block)
-      if !block_given? || block.arity != 1
-        raise InvalidBlockSpecification, "entry_processor proc should have an arity of 1 (String: line)"
-      end
-      @entry_processor = block
-    end
-
+    # How to process an entry in a file. The default takes the values and passes them to the record returned
+    #  by your finder and calls update attributes
     # Proc should receive two parameters
     #   attrs - Hash, mapped attributs for this record
     #   record - ~ActiveRecord:Base, record found by #finder
@@ -63,34 +71,38 @@ module Ingestor
       if !block_given? || block.arity != 2
         raise InvalidBlockSpecification, "processor proc should have an arity of 2 (Array: values, ~ActiveRecord: record)"
       end      
-      @processor = block
+      @options[:processor] = block
     end
 
+    # Processing performed on the attributes before being passed to [+finder+]
     def before(&block)
       if !block_given? || block.arity != 1
         raise InvalidBlockSpecification, "before proc should have an arity of 1 (Array: values)"
       end      
-      @before = block
+      @options[:before] = block
     end
 
+    # Processing performed on the record AFTER being passing to [+processor+]
     def after(&block)
       if !block_given? || block.arity != 1
         raise InvalidBlockSpecification, "after proc should have an arity of 1 (~ActiveRecord: record)"
       end      
-      @after = block
+      @options[:after] = block
     end
 
-    # text file index => AR's attribute name or array of names
-    # id|date
-    # 3030|2012-12-12
-    # 0 => :id
-    # 1 => [:created_at, :updated_at]    
-    def column_map(v)
-      @column_map = v
+    # This method is called for each entry in the document
+    # Block should receive 'values' (array for plain text, hash for all others) and return a hash
+    #   of ActiveModel attribute name to value
+    #
+    def map_attributes(&block)
+      if !block_given? || block.arity != 1
+        raise InvalidBlockSpecification, "after proc should have an arity of 1 (Hash|Array: values)"
+      end      
+      @options[:map_attributes] = block
     end
 
     def build
-      Ingestor::Proxy.new(@file, @includes_header, @without_protection, @delimiter, @finder, @entry_processor, @processor, @before, @after, @column_map, @compressed)
+      Ingestor::Proxy.new(@file, @options)
     end    
   end
 end
