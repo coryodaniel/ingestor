@@ -41,4 +41,4 @@ module Ingestor
   end
 end
 
-Ingestor::Config.register_parser :plain_text, Ingestor::Parser::PlainText
+Ingestor.register_parser :plain_text, Ingestor::Parser::PlainText

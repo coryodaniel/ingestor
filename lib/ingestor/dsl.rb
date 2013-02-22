@@ -5,10 +5,10 @@ module Ingestor
       @options = {}
       
       includes_header(false)
-      without_protection(true)
       compressed(false)
       parser :plain_text
       parser_options({})
+      working_directory '/tmp/ingestor'
     end
 
     def options
@@ -24,6 +24,12 @@ module Ingestor
       @options[:sample] = v
     end
 
+    # where the file will be moved locally for processing when it is compressed or a remote file.
+    # local files will not use working directory
+    def working_directory(v)
+      @options[:working_directory] = v
+    end
+
     # set parser, default :plain_text
     def parser(v)
       @options[:parser] = v
@@ -36,11 +42,7 @@ module Ingestor
 
     # skip first line?
     def includes_header(v);           @options[:includes_header] = v;end;
-    
-    # if you specify your own processor, you'll need to set without_protection in your code.
-    # this option ONLY works with the default processor
-    def without_protection(v);        @options[:without_protection] = v;end;
-    
+        
     # if the remote file is compressed, this will decompress it.
     def compressed(v);                @options[:compressed] = v;end;
 

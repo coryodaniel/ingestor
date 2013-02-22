@@ -5,4 +5,4 @@ module Ingestor
   end
 end
 
-Ingestor::Config.register_parser :json, Ingestor::Parser::Json
+Ingestor.register_parser :json, Ingestor::Parser::Json

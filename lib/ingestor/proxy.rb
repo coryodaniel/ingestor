@@ -16,6 +16,10 @@ module Ingestor
       !remote?
     end
 
+    def working_directory
+      options[:working_directory]
+    end
+
     def compressed?; options[:compressed]; end;
 
     # for debugging, testing
@@ -33,7 +37,7 @@ module Ingestor
       Ingestor::LOG.warn("No #finder specified") if !finder
       @header = @document.gets.strip if options[:includes_header]
 
-      parser = Ingestor::Config.parser_for( options[:parser] ).new(self, @document)
+      parser = Ingestor.parser_for( options[:parser] ).new(self, @document)
       parser.options( options[:parser_options] )
 
       unless options[:sample]
@@ -52,7 +56,7 @@ module Ingestor
       record = finder ? finder.call(attrs) : nil
 
       if record && record.class.ancestors.count{|r| r.to_s =~ /ActiveModel/} > 0            
-        record = process_record(attrs,record)
+        process_record(attrs,record)
         options[:after].call(record) if options[:after]
         record
       else
@@ -62,17 +66,15 @@ module Ingestor
 
     def process_record(attrs,record)
       options[:processor] ? options[:processor].call(attrs, record) : default_processor(attrs, record)
-      record
     end
 
     def default_processor(attrs,record)
-      record.update_attributes( attrs, :without_protection => options[:without_protection])
-      record
+      record.update_attributes( attrs )
     end
 
     def load_remote
       Ingestor::LOG.debug("Remote file detected #{file}...")
-      @document = Tempfile.new("local", Config.working_directory)
+      @document = Tempfile.new("local", working_directory)
       @document.binmode if compressed?
 
       open( file, 'rb' ) do |remote_file|
@@ -87,7 +89,7 @@ module Ingestor
     def load_compressed
       Ingestor::LOG.debug("Compressed file detected #{file}...")
       @tempfile     = @document
-      @document = Tempfile.new("decompressed", Config.working_directory)
+      @document = Tempfile.new("decompressed", working_directory)
       @document.binmode
       
       Zip::ZipFile.open(@tempfile.path) do |zipfile|
@@ -100,6 +102,8 @@ module Ingestor
     end
 
     def load
+      Dir.mkdir(working_directory, 0777) unless Dir.exists?(working_directory)
+
       load_remote if remote?
       load_compressed if compressed?
 

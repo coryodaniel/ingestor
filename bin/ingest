@@ -4,18 +4,18 @@ require 'ingestor'
 require 'thor'
 require 'active_support/inflector'
 
-Ingestor::Config.ensure_working_directory!
 module Ingestor
   class CommandLine < Thor
 
     desc "generate PATH", "Create a new ingestor for PATH. PATH should be an absolute path or URL"
     def generate(path)
-      Ingestor::Config.ensure_output_directory!
+      output_directory = 'script/ingestors'
+      FileUtils.mkdir_p(output_directory, mode: 0755) unless Dir.exists?(output_directory)
       
       file_name   = File.basename(path).underscore.parameterize.underscore
       file_name   = %Q{#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{file_name}.rb}
       
-      generated_file = File.join( Ingestor::Config.output_directory, file_name )
+      generated_file = File.join( output_directory, file_name )
 
       File.open(generated_file, 'w+') do |f|
         f.puts <<-HEREDOC
@@ -35,9 +35,10 @@ require 'ingestor'
 
 ingest "#{path}" do
   parser :plain_text
-  # compressed true
-  # includes_header false
-  # parser_options delimiter: '|'
+  # compressed true                     # is the file compressed
+  # includes_header false               
+  # parser_options delimiter: '|'       # parser specific
+  # working_directory '/tmp/ingestor'   # where to store files that are compressed or remote
   
   # How to map out the columns from document to ActiveRecord
   map_attributes do |values|
@@ -53,10 +54,7 @@ ingest "#{path}" do
   finder do |attrs|
     MyClass.find( attrs[:id] ) || MyClass.new
   end
-  
-  # Enable/disable attribute protection in default processor
-  # without_protection false  
-  
+    
   # The default processor simple calls update_attributes
   # processor do |attrs,record|  
   #  ... custom processor here ...

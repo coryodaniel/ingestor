@@ -11,7 +11,7 @@ Add this line to your application's Gemfile:
 
 And then execute:
 
-    $ bundle
+    $ bundle install
 
 Or install it yourself as:
 
@@ -22,82 +22,169 @@ Add the following to your Rakefile
     
 ## Usage
 
-  Given a text file
-    id|name|skill_level
-    1|George Washington|high
-    2|Colonel Sanders|low
-    3|Colonel Mustard|low
-    4|Biz Markie|high
-    5|Fat Blond Guy from TV|medium
+  Given a text file:
 
-  And an AR Class
-    class ChickenCooker
-      attr_accessible :name, :skill_level
+    id|name|population
+    1|China|1,354,040,000
+    2|India|1,210,193,422
+    3|United States|315,550,000
+
+  And an AR Class:
+
+    class Country
+      attr_accessible :name, :population
     end
 
-    ingest("path/to/my/chicken_skills.txt") do
+  Sync the file with AR:
+
+    ingest("path/to/countries.txt") do
       map_attributes do |values|
         {
           id:           values[0],
           name:         values[1],
-          skill_level:  values[2]
+          population:  values[2]
         }
       end
 
       # current lines values
-      finder{|attrs| ChickenCooker.where(id: attrs[:id]).first || ChickenCooker.new}
-
+      finder{|attrs| 
+        Country.where(id: attrs[:id]).first || Country.new
+      }
     end
 
   It can handle remote files and zip files as well.
 
-    ingest("http://example.com/alot_of_chicken_people.zip") do
+    ingest("http://example.com/a_lot_of_countries.zip") do
       compressed true
       map_attributes do |values|
         {
           id:           values[0],
           name:         values[1],
-          skill_level:  values[2]
+          population:  values[2]
         }
       end
 
       # current lines values
-      finder{|attrs| ChickenCooker.where(id: attrs[:id]).first || ChickenCooker.new}
+      finder{|attrs| 
+        Country.where(id: attrs[:id]).first || Country.new
+      }
     end
 
+  It can handle XML, JSON, and more... 
+  
+    ingest("http://example.com/books.xml") do
+      parser :xml
+      parser_options xpath: '//book'
+      map_attributes do |values|
+        {
+          id:           values['id'],
+          title:        values['title'],
+          author:       {
+            name: values['author']
+          }
+        }
+      end
+
+      # current lines values
+      finder{|attrs| 
+        Book.where(id: attrs[:id]).first || Book.new
+      }
+
+      processor{|attrs,record|
+        record.update_attributes(attrs)
+        record.reviews.create({
+          stars: 5,
+          comment: "Every book they sell is so great!"
+        })
+      }
+    end  
 
 ## Advanced Usage
 DSL Options
-  * sample - Boolean (defaults: false) will dump a single raw entry from the file to STDOUT and exit
-  * includes_header - Boolean (default: false)
-  * compressed - Boolean (default: false) Is the file compressed
-  * without_proctection - Boolean (default: true)
-  * finder - Proc, required: should return an ActiveModel object (ex: MyClass.new) to store the values in
-  * before - receives attributes before call to #processor. Should return attributes hash
-  * processor
-  * after
-  * parser Symbol [:plain_text, :xml, :json, :csv]
-  * parser_options Hash (see specific parser)
+  * parser - the parser to use on the file
+    * Symbol
+    * Optional
+    * Default: :plain_text
+    * Available Values: :plain_text, :xml, :json, :csv, :html
+    * See 'Included Parsers' below
+  * parser_options - options for a specific parser
+    * Hash
+    * Optional
+    * Default: set per parser
+    * See 'Included Parsers' below
+  * sample - dump a single raw entry from the file to STDOUT and exit
+    * Boolean 
+    * Optional
+    * Default: false
+    (defaults: false) will 
+  * includes_header - Tells the parser that the first line is a header and should be ignored
+    * Boolean
+    * Optional
+    * Default: false
+  * compressed - Should the file be decompressed
+    * Boolean
+    * Optional
+    * Default: false
+  * working_directory - where to store remote or decompressed files for local processing
+    * String
+    * Optional
+    * Default: /tmp/ingestor
+  * before - callback that receives attributes for each record BEFORE call to [finder]
+    * Proc(attributes)
+    * Optional
+    * Default: nil
+  * finder - Arel finder for each object
+    * Proc(attributes)
+    * Returns: ~ActiveModel
+    * Required
+  * processor - What to do with the attributes and object
+    * Proc(attributes,record)
+    * Returns: ~ActiveModel
+    * Optional
+    * Default: Proc, calls #update_attributes on record
+  * after - callback that receives each record after [processor]
+    * Proc(record)
+    * Optional  
 
 
-## Parsers
-There are 2 processors currently included. Plain Text and XML.
+## Included Parsers
 
-Support for JSON and CSV are under development.
+Writing parsers is simple ([see examples](https://github.com/coryodaniel/ingestor/tree/master/lib/ingestor/parser])).
 
-## Plain Text Parser
-  Parses a plain text document. The default delimiter is "|"
+### Plain Text Parser
+  Parses a plain text document.
 
   Options
-    * delimiter - String, optional
-    * line_processor - Proc(string) -> Array, takes the raw line from the document and returns an array of values
+  * delimiter - how to split up each line
+    * String
+    * Default: '|'
+    * Optional
+  * line\_processor - override default\_line\_processor. The default\_line\_processor simply splits the string using the delimiter
+    * Proc(string)
+    * Returns Array
+    * Default: nil
+    * Optional
 
-## XML Parser
+### XML Parser
   Parses an XML document
 
   Options
-    * selector (xpath selector to get the node collection)
-    * encoding (See nokogiri encoding, default libmxl2 best guess)
+  * selector - xpath selector to get the node collection
+    * String
+    * Required
+  * encoding - XML Encoding. See nokogiri encoding
+    * String
+    * Optional
+    * Default libxml2 best guess
+
+### JSON Parser
+Coming soon...
+
+### CSV Parser
+Coming soon...
+
+### HTML Parser
+Coming soon...
 
 
 ## Contributing
@@ -112,16 +199,13 @@ Support for JSON and CSV are under development.
   
   1. Copy spec/orm/database.example.yml => spec/orm/database.yml
   2. Configure spec/orm/database.yml
-  3. 
-    export db=YOUR_ADAPTER_HERE; bundle exec guard
-    export db=mysql; bundle exec guard
+  3. bundle exec guard
 
 
-## TODO
-* re-write this readme
+## Todos
 * rdoc lib/ folder
-* bin/ingestor sample PATH -> take a peak at an entry from the file
+* Move includes_header to CSV, PlainText
 * Mongoid Support
-* specify encoding(?)
 * sort/limit options
-* Disable validations option
+* A way to sample a file without building an ingestor first
+  * bin/ingestor --sample --path=./my.xml --parser xml --parser_options_xpath '//book'

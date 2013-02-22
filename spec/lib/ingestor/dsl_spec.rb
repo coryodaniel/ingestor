@@ -12,9 +12,14 @@ describe Ingestor::Dsl do
     @dsl.options[:includes_header].should be(false)
   end
 
-  it 'should expect to disable AREL protection by default' do
-    @dsl.options[:without_protection].should be(true)
-  end  
+  it 'should have a default working directory' do
+    @dsl.options[:working_directory].should eq('/tmp/ingestor')
+  end
+
+  it 'should be able to specify a working directory' do
+    @dsl.working_directory '/tmp/other'
+    @dsl.options[:working_directory].should eq('/tmp/other')
+  end
 
   it 'should be able to set if a header line is included' do
     @dsl.includes_header(true)
@@ -29,14 +34,6 @@ describe Ingestor::Dsl do
     
     @dsl.compressed(false)
     @dsl.options[:compressed].should be(false)
-  end
-
-  it 'should be able to disable AREL attribute protection' do
-    @dsl.without_protection(true)
-    @dsl.options[:without_protection].should be(true)
-    
-    @dsl.without_protection(false)
-    @dsl.options[:without_protection].should be(false)
   end
 
   it 'should be able to specify the parser' do

@@ -34,4 +34,4 @@ module Ingestor
   end
 end
 
-Ingestor::Config.register_parser :xml, Ingestor::Parser::Xml
+Ingestor.register_parser :xml, Ingestor::Parser::Xml

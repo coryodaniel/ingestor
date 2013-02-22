@@ -10,9 +10,12 @@ coverage
 doc/
 lib/bundler/man
 pkg
+log
 rdoc
 spec/reports
 test/tmp
 test/version_tmp
 tmp
 spec/orm/database.yml
+.DS_Store
+**/.DS_Store

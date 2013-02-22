@@ -5,4 +5,4 @@ module Ingestor
   end
 end
 
-Ingestor::Config.register_parser :csv, Ingestor::Parser::Csv
+Ingestor.register_parser :csv, Ingestor::Parser::Csv

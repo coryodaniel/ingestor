@@ -72,28 +72,6 @@ describe Ingestor::Proxy do
     end    
   end
 
-  describe '#without_protection' do
-    it "should not set the value when using protection" do
-      ingest("./samples/flags.txt") do
-        includes_header true
-        finder{|values| Country.new}
-        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2], :secrets => values[3]} }
-        without_protection false
-      end
-      Country.where(name: 'Germany').first.secrets.should be(nil)
-    end
-
-    it "should set the value when not using protection" do
-      ingest("./samples/flags.txt") do
-        includes_header true
-        finder{|values| Country.new}
-        map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2], :secrets => values[3]} }
-        without_protection true
-      end      
-      Country.where(name: 'Germany').first.secrets.should == 'fat steamy wieners'
-    end    
-  end
-
   describe '#before' do
     before :each do
       ingest("./samples/flags.txt") do
@@ -136,7 +114,7 @@ describe Ingestor::Proxy do
         finder{|values| Country.new}
         map_attributes{|values| {:name => values[0], :colors => values[1], :count => values[2], :secrets => values[3]} }
         processor{|attrs,record|
-          record.update_attributes attrs, without_protection: true
+          record.update_attributes attrs
           record.secrets = "Squirrel Party"
           record.save
           record
