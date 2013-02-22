@@ -21,7 +21,7 @@ class HotelChain
 end
 # end bogusness
 
-ingest "https://www.ian.com/affiliatecenter/include/V2/ChainList.zip" do
+ingest "./samples/ChainList.zip" do
   parser :plain_text
   compressed true
   includes_header true

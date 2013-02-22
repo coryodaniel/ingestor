@@ -71,7 +71,8 @@ Add the following to your Rakefile
     end
 
   It can handle XML, JSON, and more... 
-  
+
+    require 'ingestor/parser/xml'
     ingest("http://example.com/books.xml") do
       parser :xml
       parser_options xpath: '//book'
@@ -101,6 +102,7 @@ Add the following to your Rakefile
 
   JSON Example
 
+    require 'ingestor/parser/json'
     ingest("http://example.com/people.json") do
       parser :json
       parser_options collection: lambda{|document|
@@ -236,6 +238,7 @@ Coming soon...
 
 
 ## Todos
+* Deprecate plain_text 
 * rdoc http://rdoc.rubyforge.org/RDoc/Markup.html
 * Move includes_header to CSV, PlainText
 * Mongoid Support
