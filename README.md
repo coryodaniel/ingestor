@@ -99,6 +99,33 @@ Add the following to your Rakefile
       }
     end  
 
+  JSON Example
+
+    ingest("http://example.com/people.json") do
+      parser :json
+      parser_options collection: lambda{|document|
+        document['people']
+      }
+      map_attributes do |values|
+        {
+          name:         values["first_name"] + " " + values["last_name"]
+          age:          values['age'],
+          address:      values['address']
+        }
+      end
+
+      # current lines values
+      finder{|attrs| 
+        Person.where(name: attrs[:name]).first || Person.new
+      }
+
+      processor{|attrs,record|
+        record.update_attributes(attrs)
+        record.send_junk_mail!
+      }
+    end    
+
+
 ## Advanced Usage
 DSL Options
   * parser - the parser to use on the file
@@ -178,7 +205,13 @@ Writing parsers is simple ([see examples](https://github.com/coryodaniel/ingesto
     * Default libxml2 best guess
 
 ### JSON Parser
-Coming soon...
+  Parses a JSON document
+
+  Options
+  * collection - receives the document and narrows it down to the collection you are interested in
+    * Proc(Hash)
+    * Returns Hash | Array
+    * Required
 
 ### CSV Parser
 Coming soon...
@@ -203,9 +236,10 @@ Coming soon...
 
 
 ## Todos
-* rdoc lib/ folder
+* rdoc http://rdoc.rubyforge.org/RDoc/Markup.html
 * Move includes_header to CSV, PlainText
 * Mongoid Support
 * sort/limit options
+* configure travis
 * A way to sample a file without building an ingestor first
   * bin/ingestor --sample --path=./my.xml --parser xml --parser_options_xpath '//book'

@@ -17,18 +17,20 @@ module Ingestor
       end
 
       def sample!
-        doc = Nokogiri::XML(@document, nil, @options[:encoding])
-        puts Hash.from_xml( doc.xpath(@options[:xpath]).first.to_s )
+        puts Hash.from_xml( document.xpath(@options[:xpath]).first.to_s )
       end      
 
       def process!
-        doc = Nokogiri::XML(@document, nil, @options[:encoding])
-        
-        doc.xpath(@options[:xpath]).each do |node|
+        document.xpath(@options[:xpath]).each do |node|
           node_attrs = Hash.from_xml(node.to_s)
           attrs   = @proxy.options[:map_attributes].call( node_attrs )
           @proxy.process_entry attrs
         end
+      end
+
+      protected
+      def document
+        Nokogiri::XML(@document, nil, @options[:encoding])
       end
     end
   end

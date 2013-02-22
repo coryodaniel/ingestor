@@ -19,5 +19,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency "docile"
   gem.add_dependency "rubyzip"
   gem.add_dependency "thor"
+  gem.add_dependency "nokogiri", '~> 1.5.6'
   gem.add_dependency "activesupport", '>= 3.2.0'
+  gem.add_dependency 'multi_json', '~> 1.0'
 end

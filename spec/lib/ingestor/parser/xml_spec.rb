@@ -11,14 +11,12 @@ describe Ingestor::Parser::Xml do
         })
         finder{|attrs| Dummy.new}
         map_attributes{|values| 
-          puts values
           {:name => values['book']['title']} 
         }
       end
     end
     
     it 'should be able to process an XML file' do
-
       Dummy.first.name.should eq "XML Developer's Guide"
     end
   end

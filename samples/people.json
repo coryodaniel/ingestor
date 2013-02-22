@@ -1,8 +1,8 @@
 {"people":
   [
     {
-      "firstName": "John",
-      "lastName": "Smith",
+      "first_name": "John",
+      "last_name": "Smith",
       "age": 25,
       "address": {
         "streetAddress": "21 2nd Street",
@@ -12,11 +12,11 @@
       }
     },
     {
-      "firstName": "John",
-      "lastName": "Smith",
-      "age": 25,
+      "first_name": "Joanne",
+      "last_name": "Smith",
+      "age": 93,
       "address": {
-        "streetAddress": "21 2nd Street",
+        "streetAddress": "Westchester Street",
         "city": "New York",
         "state": "NY",
         "postalCode": 10021
