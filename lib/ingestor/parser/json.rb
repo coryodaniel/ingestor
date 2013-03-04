@@ -6,7 +6,7 @@ module Ingestor
       include Ingestor::Parser::Base      
       def options(opts={})
         @options = {
-          collection: nil
+          :collection => nil
         }.merge(opts)
       end
 

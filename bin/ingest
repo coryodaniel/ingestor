@@ -10,7 +10,7 @@ module Ingestor
     desc "generate PATH", "Create a new ingestor for PATH. PATH should be an absolute path or URL"
     def generate(path)
       output_directory = 'script/ingestors'
-      FileUtils.mkdir_p(output_directory, mode: 0755) unless Dir.exists?(output_directory)
+      FileUtils.mkdir_p(output_directory, :mode => 0755) unless Dir.exists?(output_directory)
       
       file_name   = File.basename(path).underscore.parameterize.underscore
       file_name   = %Q{#{Time.now.utc.strftime("%Y%m%d%H%M%S")}_#{file_name}.rb}

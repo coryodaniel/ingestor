@@ -5,8 +5,8 @@ module Ingestor
 
       def options(opts={})
         @options = {
-          delimiter: '|',
-          line_processor: nil
+          :delimiter => '|',
+          :line_processor => nil
         }.merge(opts)
       end
 

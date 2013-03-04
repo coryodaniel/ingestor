@@ -11,8 +11,8 @@ module Ingestor
       include Ingestor::Parser::Base      
       def options(opts={})
         @options = {
-          encoding: nil,
-          xpath: nil
+          :encoding => nil,
+          :xpath    => nil
         }.merge(opts)
       end
 
