@@ -20,7 +20,11 @@ module Ingestor
       File.open(generated_file, 'w+') do |f|
         f.puts <<-HEREDOC
 #! /usr/bin/env ruby
+require 'rubygems'
+require 'bundler/setup'
 require 'ingestor'
+require 'ingestor/parser/json'
+require 'ingestor/parser/xml'
 
 ######################################
 #

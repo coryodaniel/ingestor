@@ -1,5 +1,5 @@
 require 'multi_json'
-require 'debugger'
+
 module Ingestor
   module Parser
     class Json
