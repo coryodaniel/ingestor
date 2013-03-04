@@ -55,7 +55,7 @@ module Ingestor
             
       record = finder ? finder.call(attrs) : nil
 
-      if record && record.class.ancestors.count{|r| r.to_s =~ /ActiveModel/} > 0            
+      if record && record.class.ancestors.count{|r| r.to_s =~ /ActiveModel|ActiveRecord/} > 0            
         process_record(attrs,record)
         options[:after].call(record) if options[:after]
         record
