@@ -104,7 +104,11 @@ module Ingestor
     end
 
     def build
-      Ingestor::Proxy.new(@file, @options)
+      @proxy = Ingestor::Proxy.new(@file, @options)
     end    
+
+    def proxy
+      @proxy
+    end
   end
 end

@@ -285,6 +285,7 @@ Coming soon...
 
 
 ## Todos
+* HTML processor should use capybara, include a "setup method" for logging in, filling out, etc...
 * Deprecate plain_text (this was the first thing I created)
 * rdoc http://rdoc.rubyforge.org/RDoc/Markup.html
 * Move includes_header to CSV, PlainText
