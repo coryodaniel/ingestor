@@ -3,6 +3,9 @@
 A simple DSL for importing data from text and csv files to ActiveRecord. This was originally designed to 
 continually import changing data from EAN and Geonames.
 
+Great for parsing JSON, XML, CSV and plaint text into ActiveRecord, if you
+need to scrape HTML I suggest [klepto](http://github.com/coryodaniel/klepto)
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -37,143 +40,148 @@ Add the following to your Rakefile
   ```
 
   Sync the file with AR:
-
-    ingest("path/to/countries.txt") do
-      map_attributes do |values|
-        {
-          id:           values[0],
-          name:         values[1],
-          population:  values[2]
-        }
-      end
-
-      # current lines values
-      finder{|attrs| 
-        Country.where(id: attrs[:id]).first || Country.new
+  ```ruby
+  ingest("path/to/countries.txt") do
+    map_attributes do |values|
+      {
+        id:           values[0],
+        name:         values[1],
+        population:  values[2]
       }
     end
+
+    # current lines values
+    finder{|attrs| 
+      Country.where(id: attrs[:id]).first || Country.new
+    }
+  end
+  ```
 
   It can handle remote files and zip files as well.
-
-    ingest("http://example.com/a_lot_of_countries.zip") do
-      compressed true
-      map_attributes do |values|
-        {
-          id:           values[0],
-          name:         values[1],
-          population:  values[2]
-        }
-      end
-
-      # current lines values
-      finder{|attrs| 
-        Country.where(id: attrs[:id]).first || Country.new
+  ```ruby
+  ingest("http://example.com/a_lot_of_countries.zip") do
+    compressed true
+    map_attributes do |values|
+      {
+        id:           values[0],
+        name:         values[1],
+        population:  values[2]
       }
     end
 
+    # current lines values
+    finder{|attrs| 
+      Country.where(id: attrs[:id]).first || Country.new
+    }
+  end
+  ```
+
   It can handle XML, JSON, and more... 
-
-    require 'ingestor/parser/xml'
-    ingest("http://example.com/books.xml") do
-      parser :xml
-      parser_options xpath: '//book'
-      map_attributes do |values|
-        {
-          id:           values['id'],
-          title:        values['title'],
-          author:       {
-            name: values['author']
-          }
+  ```ruby
+  require 'ingestor/parser/xml'
+  ingest("http://example.com/books.xml") do
+    parser :xml
+    parser_options xpath: '//book'
+    map_attributes do |values|
+      {
+        id:           values['id'],
+        title:        values['title'],
+        author:       {
+          name: values['author']
         }
-      end
-
-      # current lines values
-      finder{|attrs| 
-        Book.where(id: attrs[:id]).first || Book.new
       }
+    end
 
-      processor{|attrs,record|
-        record.update_attributes(attrs)
-        record.reviews.create({
-          stars: 5,
-          comment: "Every book they sell is so great!"
-        })
-      }
-    end  
+    # current lines values
+    finder{|attrs| 
+      Book.where(id: attrs[:id]).first || Book.new
+    }
+
+    processor{|attrs,record|
+      record.update_attributes(attrs)
+      record.reviews.create({
+        stars: 5,
+        comment: "Every book they sell is so great!"
+      })
+    }
+  end  
+  ```
 
   CSV Example
+  ```ruby
+  require 'ingestor/parser/csv'
+  ingest "./samples/contracts.csv" do
+    parser :csv
+    
+    # all options come directly from Ruby core CSV class
+    parser_options :headers => true,
+      :col_sep            => ",",
+      :row_sep            => :auto,
+      :quote_char         => '"',
+      :field_size_limit   => nil,
+      :converters         => nil,
+      :unconverted_fields => nil,
+      :return_headers     => false,
+      :header_converters  => nil,
+      :skip_blanks        => false,
+      :force_quotes       => false    
 
-    require 'ingestor/parser/csv'
-    ingest "./samples/contracts.csv" do
-      parser :csv
-      
-      # all options come directly from Ruby core CSV class
-      parser_options :headers => true,
-        :col_sep            => ",",
-        :row_sep            => :auto,
-        :quote_char         => '"',
-        :field_size_limit   => nil,
-        :converters         => nil,
-        :unconverted_fields => nil,
-        :return_headers     => false,
-        :header_converters  => nil,
-        :skip_blanks        => false,
-        :force_quotes       => false    
+    # How to map out the columns from text to AR
+    map_attributes do |row|
+      {
+        id:                 row[0],
+        seller_name:        row[1],
+        customer_name:      row[2],
+        commencement_date:  row[7],
+        termination_date:   row[8]
+      }
+    end
+    
+    # before{|attrs| attrs}
+    
+    # Your strategy for finding or instantiating a new object to be handled by the processor block
+    finder{|attrs|
+      Contract.new
+    }
 
-      # How to map out the columns from text to AR
-      map_attributes do |row|
-        {
-          id:                 row[0],
-          seller_name:        row[1],
-          customer_name:      row[2],
-          commencement_date:  row[7],
-          termination_date:   row[8]
-        }
-      end
-      
-      # before{|attrs| attrs}
-      
-      # Your strategy for finding or instantiating a new object to be handled by the processor block
-      finder{|attrs|
-        Contract.new
-      }
-
-      processor{|attrs,record|
-        # ... custom processor here ...
-        record.update_attributes attrs
-      }
-      
-      after{|record| 
-        puts "Created: #{record.summary}"
-      }
-    end  
+    processor{|attrs,record|
+      # ... custom processor here ...
+      record.update_attributes attrs
+    }
+    
+    after{|record| 
+      puts "Created: #{record.summary}"
+    }
+  end  
+  ```
 
   JSON Example
-
-    require 'ingestor/parser/json'
-    ingest("http://example.com/people.json") do
-      parser :json
-      parser_options collection: lambda{|document|
-        document['people']
+  ```ruby
+  require 'ingestor/parser/json'
+  ingest("http://example.com/people.json") do
+    parser :json
+    parser_options collection: lambda{|document|
+      document['people']
+    }
+    map_attributes do |values|
+      {
+        name:         values["first_name"] + " " + values["last_name"]
+        age:          values['age'],
+        address:      values['address']
       }
-      map_attributes do |values|
-        {
-          name:         values["first_name"] + " " + values["last_name"]
-          age:          values['age'],
-          address:      values['address']
-        }
-      end
+    end
 
-      # current lines values
-      finder{|attrs| 
-        Person.where(name: attrs[:name]).first || Person.new
-      }
+    # current lines values
+    finder{|attrs| 
+      Person.where(name: attrs[:name]).first || Person.new
+    }
 
-      processor{|attrs,record|
-        record.update_attributes(attrs)
-        record.send_junk_mail!
-      }
-    end    
+    processor{|attrs,record|
+      record.update_attributes(attrs)
+      record.send_junk_mail!
+    }
+  end
+  ```  
 
 
 ## Advanced Usage
@@ -286,7 +294,6 @@ Coming soon...
 
 
 ## Todos
-* HTML processor should use capybara, include a "setup method" for logging in, filling out, etc...
 * Deprecate plain_text (this was the first thing I created)
 * rdoc http://rdoc.rubyforge.org/RDoc/Markup.html
 * Move includes_header to CSV, PlainText
