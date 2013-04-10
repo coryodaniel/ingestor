@@ -4,7 +4,7 @@ A simple DSL for importing data from text and csv files to ActiveRecord. This wa
 continually import changing data from EAN and Geonames.
 
 Great for parsing JSON, XML, CSV and plaint text into ActiveRecord, if you
-need to scrape HTML I suggest [klepto](http://github.com/coryodaniel/klepto)
+need to scrape HTML into ActiveRecord check out [klepto](http://github.com/coryodaniel/klepto).
 
 ## Installation
 
