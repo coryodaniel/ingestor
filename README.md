@@ -30,10 +30,11 @@ Add the following to your Rakefile
     3|United States|315,550,000
 
   And an AR Class:
-
-    class Country
-      attr_accessible :name, :population
-    end
+  ```ruby
+  class Country
+    attr_accessible :name, :population
+  end
+  ```
 
   Sync the file with AR:
 
