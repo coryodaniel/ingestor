@@ -7,7 +7,6 @@ gem 'rb-fsevent'
 gem "guard", '1.6.1'
 gem "guard-bundler"
 gem "guard-rspec"
-gem 'debugger', '1.2.0'
 gem 'vcr'
 gem 'fakeweb'
 #gem 'activerecord', "~>3.2.0"

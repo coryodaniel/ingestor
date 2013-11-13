@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'active_record'
 
-ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new('log/test.log')
 ActiveRecord::Base.establish_connection YAML.load(File.open(File.join(File.dirname(__FILE__), 'database.yml')).read)[ENV['db'] || 'mysql']
 
 ActiveRecord::Migration.verbose = false
@@ -29,5 +28,4 @@ end
 
 class Dummy < ActiveRecord::Base;end;
 class Country < ActiveRecord::Base
-  attr_protected :secrets
 end

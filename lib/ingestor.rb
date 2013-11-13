@@ -7,8 +7,6 @@ require 'ingestor/version'
 require 'ingestor/proxy'
 require 'ingestor/dsl'
 
-#require 'debugger'
-
 module Ingestor
   LOG = Logger.new(STDOUT)
   LOG.level = Logger::WARN
