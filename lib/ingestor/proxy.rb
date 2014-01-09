@@ -55,13 +55,9 @@ module Ingestor
             
       record = finder ? finder.call(attrs) : nil
 
-      if record && record.class.ancestors.count{|r| r.to_s =~ /ActiveModel|ActiveRecord/} > 0            
-        process_record(attrs,record)
-        options[:after].call(record) if options[:after]
-        record
-      else
-        Ingestor::LOG.warn("Processing skipped, ActiveModel type record not returned for #{attrs}")
-      end
+      process_record(attrs,record)
+      options[:after].call(record) if options[:after]
+      record
     end
 
     def process_record(attrs,record)
